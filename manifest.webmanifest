@@ -1,0 +1,30 @@
+{
+ "name": "Конструктор польового блокнота",
+ "short_name": "Блокнот",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "background_color": "#141713",
+ "theme_color": "#1a1d18",
+ "lang": "uk",
+ "icons": [
+  {
+   "src": "icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  }
+ ]
+}

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Конструктор польового блокнота</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#1a1d18"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
+<style>
+body{--ac:#3f4e2c;--al:#f2f5ee;--as:#7c8f62;--accent-color:var(--ac);--accent-light:var(--al);margin:0;display:flex;height:100vh;overflow:hidden;background:#111310;font:13px system-ui,'Segoe UI',Arial,sans-serif;color:#e2e8f0}
+body.th-g{--ac:#2b3648;--al:#f1f5f9;--as:#64748b}body.th-b{--ac:#000;--al:#f2f2f2;--as:#000}
+aside{width:348px;flex-shrink:0;background:#1a1d18;border-right:1px solid #2e342b;overflow:auto;padding:14px;box-sizing:border-box}
+main{flex:1;overflow:auto;padding:18px;background-image:radial-gradient(#262b23 1px,transparent 1px);background-size:18px 18px}
+.app-brand{display:flex;align-items:center;gap:9px;padding-bottom:6px;border-bottom:1px solid #2c3229}
+.app-brand svg{width:22px;height:22px;color:#8fa86e;flex-shrink:0}
+h3{margin:14px 0 5px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#9eb08f;border-bottom:1px solid #2c3229;padding-bottom:3px}
+label{display:block;margin:6px 0 2px;font-size:11px;color:#a8b89b}
+input,select,button,textarea{background:#141713;color:#e2e8f0;border:1px solid #3c4538;border-radius:6px;padding:5px 8px;font:inherit;box-sizing:border-box;transition:.15s}
+input[type=text],input:not([type]),select{width:100%}input[type=checkbox]{width:auto;accent-color:#688246}
+.zoom-box{display:flex;align-items:center;gap:8px;background:#141713;border:1px solid #3c4538;border-radius:6px;padding:6px 8px}
+.zoom-val{font:700 11px ui-monospace,Consolas,monospace;color:#a8b89b;min-width:34px;text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;background:#2c3229;border:none;border-radius:99px;padding:0;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:#688246;border:1.5px solid #e2e8f0;box-shadow:0 1px 4px #0008;transition:.15s}
+input[type=range]::-webkit-slider-thumb:hover{background:#7d9b55;transform:scale(1.12)}
+input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:#688246;border:1.5px solid #e2e8f0;box-shadow:0 1px 4px #0008;transition:.15s}
+button{cursor:pointer}button:hover{background:#3f4e2c;border-color:#688246}
+.pr{width:100%;padding:10px;background:linear-gradient(180deg,#556b38,#3f4e2c);border-color:#728852;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-top:12px;box-shadow:0 4px 12px #0006}
+details>summary{cursor:pointer;font-size:11px;color:#a8b89b;padding:4px 0;font-weight:700;letter-spacing:.04em}summary small{color:#6b7a62;font-weight:400}
+.mc{background:#222720;border:1px solid #343b31;border-radius:8px;padding:6px 8px;margin:4px 0}.mc.off{opacity:.55}
+.mc label{display:inline;font-size:12px;color:#e2e8f0}.ac{float:right;display:flex;gap:2px}.ac button{padding:2px 6px;font-size:11px}.cp{font-size:11px;margin-top:4px;color:#9ca894}
+#inf{font-size:12px;margin:0 auto 12px;max-width:680px;background:#1a1d18cc;backdrop-filter:blur(4px);padding:8px 12px;border-radius:8px;border:1px solid #2e342b}#tm{position:fixed;right:14px;bottom:14px;background:#3f4e2c;border:1px solid #728852;padding:7px 12px;border-radius:6px;display:none;font-weight:600;box-shadow:0 6px 18px #0008}
+dialog{background:#1e221c;color:#e2e8f0;border:1px solid #454f40;border-radius:10px;max-width:min(170mm,96vw);width:100%}dialog::backdrop{background:#000b}
+#sheets{width:max-content;margin:0 auto}.wrap{margin:0 auto 20px;width:max-content}.lab{color:#9ca894;font-size:11px;margin-bottom:4px;font-family:ui-monospace,Consolas,monospace}
+.sh{display:flex;background:#fff;position:relative;overflow:hidden;box-shadow:0 12px 32px #000a}
+.p1{width:148mm;height:210mm}.p2{width:297mm;height:210mm}.p2 .pg{width:148.5mm}.p2.cm::after{content:"";position:absolute;left:50%;top:0;bottom:0;border-left:.4pt dashed #94a3b8}
+.pa4{width:210mm;height:297mm}.pa4 .pg{width:210mm;height:297mm}
+/* Tactical Officer Page Frame & Crosshairs */
+.pg{width:148mm;height:210mm;display:flex;flex-direction:column;box-sizing:border-box;overflow:hidden;background:#fff;color:#0f172a;font:8pt/1.3 system-ui,'Segoe UI',Arial,sans-serif;position:relative}
+.pg.o{padding:8mm 8mm 6.5mm var(--bind,14mm)}.pg.e{padding:8mm var(--bind,14mm) 6.5mm 8mm}.pg.ov{outline:2px solid #dc2626;outline-offset:-2px}
+.pg::before{content:"";position:absolute;inset:5.5mm;border:.4pt solid #cbd5e1;pointer-events:none;z-index:1}
+.pg.o::before{left:calc(var(--bind,14mm) - 3.5mm)}.pg.e::before{right:calc(var(--bind,14mm) - 3.5mm)}
+/* Completely blank filler page without border or footer */
+.pg.pg-blank::before,.pg:has(.tp)::before{display:none!important}
+.edp{display:block;height:auto;max-height:62vh;overflow:auto;border:1px solid #94a3b8}
+/* Header with tactical chevron & mono code */
+.hd{display:flex;justify-content:space-between;align-items:center;border-bottom:1.5pt solid var(--ac);padding-bottom:1.2mm;margin-bottom:2mm;position:relative}
+.hd::after{content:"";position:absolute;bottom:-1.5pt;left:0;width:24mm;height:2.5pt;background:var(--ac)}
+.st{font-size:10.5pt;font-weight:800;text-transform:uppercase;color:var(--ac);letter-spacing:.03em;display:flex;align-items:center;gap:1.5mm}
+.st::before{content:"▪";font-size:8pt;color:var(--as)}
+.sc{font-size:6.8pt;font-weight:700;font-family:ui-monospace,Consolas,monospace;color:var(--ac);background:var(--al);border:.5pt solid var(--as);padding:.3mm 1.5mm;border-radius:2px;letter-spacing:.04em}
+.in{flex:1;min-height:0;overflow:hidden;position:relative;z-index:2}
+.ft{display:flex;justify-content:space-between;align-items:center;border-top:.6pt solid #94a3b8;padding-top:1mm;margin-top:1mm;font:6.5pt ui-monospace,Consolas,monospace;color:#475569;letter-spacing:.03em}
+/* Elements */
+.bar,.section-bar{background:linear-gradient(90deg,var(--al),transparent);border-left:3pt solid var(--ac);border-bottom:.4pt solid #cbd5e1;font-size:7.8pt;font-weight:800;text-transform:uppercase;letter-spacing:.03em;padding:.6mm 2mm;margin:2mm 0 1mm;color:#0f172a}
+.tt,.tac-table{width:100%;table-layout:fixed;word-wrap:break-word;border-collapse:collapse;font-size:7.4pt;margin-bottom:1.5mm}
+.tt th,.tac-table th{background:var(--al);border:.6pt solid #64748b;padding:.8mm 1.2mm;text-align:left;font-weight:700;color:#0f172a;text-transform:uppercase;font-size:6.8pt;letter-spacing:.02em}
+.tt td,.tac-table td{border:.5pt solid #94a3b8;padding:.8mm 1.2mm;vertical-align:top}
+.wl,.write-lines{background-image:repeating-linear-gradient(transparent 0 5.7mm,#cbd5e1 5.7mm 6mm);border:.5pt solid #94a3b8;padding:0 1.2mm}
+.gr,.square-grid{background-size:5mm 5mm;background-image:linear-gradient(90deg,#cbd5e1 .4pt,transparent .4pt),linear-gradient(#cbd5e1 .4pt,transparent .4pt);border:.7pt solid #64748b;position:relative}
+.dg{background:radial-gradient(#94a3b8 .3mm,transparent .3mm) 0 0/5mm 5mm;border:.5pt solid #94a3b8}
+.ci,.tac-check-item{display:flex;gap:1.5mm;margin:.6mm 0}.cb,.tac-check-box{cursor:pointer;font-weight:700;color:var(--ac);user-select:none}
+.mr{display:flex;justify-content:space-between;background:var(--al);border:.5pt solid #cbd5e1;padding:.8mm 1.8mm;margin-bottom:1.2mm;font-size:7.4pt}
+.co,.tac-callout{border-left:2.5pt solid var(--ac);border-top:.4pt solid #cbd5e1;border-right:.4pt solid #cbd5e1;border-bottom:.4pt solid #cbd5e1;background:var(--al);padding:1mm 2mm;margin:1mm 0}.g2{display:grid;grid-template-columns:1fr 1fr;gap:2mm}
+
+/* Creative Officer Cover Pages - All 5 Layouts (d, g, c, r, m) */
+.tp{height:100%;display:flex;flex-direction:column;justify-content:space-between;text-align:center;position:relative;padding:4mm;border:1.5pt solid var(--ac);box-sizing:border-box}
+.tmk{font:700 8pt ui-monospace,Consolas,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--ac);min-height:4mm}
+.tlg{display:flex;justify-content:center;gap:6mm;margin-top:6mm}
+.lg{width:28mm;height:28mm;display:flex;align-items:center;justify-content:center}.lg img{max-width:100%;max-height:100%;object-fit:contain}
+.ph{border:1px dashed #94a3b8;color:#94a3b8;font:600 6.5pt ui-monospace,Consolas,monospace;letter-spacing:.05em}
+.tm{margin:auto 0}
+.t1{font-size:22pt;font-weight:800;text-transform:uppercase;color:var(--ac);line-height:1.12;letter-spacing:.02em}
+.t2{font-size:10.5pt;font-weight:600;color:#334155;margin-top:3mm}
+.dv{border:0;border-top:2pt solid var(--ac);width:42mm;margin:5mm auto}
+.t3{font-size:11pt;font-weight:700;color:#0f172a}
+.t4{font-size:9.5pt;color:#475569;margin-top:1.5mm}
+.to{font:600 8.5pt ui-monospace,Consolas,monospace;color:#1e293b;border-top:.6pt solid #94a3b8;padding-top:2.5mm;min-height:5mm}
+
+/* Layout d: Штабна папка (рапорт-стиль) */
+.tp.d{text-align:left;padding:0;border:1.5pt solid var(--ac)}
+.tp.d .tmk{background:var(--ac);color:#fff;padding:2.2mm 4mm;letter-spacing:.16em;display:flex;justify-content:space-between}
+
+.tp.d .tlg{justify-content:flex-start;padding:5mm 5mm 0 5mm;margin-top:2mm}
+.tp.d .tm{padding:4mm 5mm;border-left:4pt solid var(--ac);margin:auto 5mm;background:var(--al)}
+.tp.d .dv{margin:4mm 0;width:36mm}
+.tp.d .to{margin:0 5mm 4mm 5mm;padding-top:2.5mm}
+
+/* Layout g: Топографічна сітка (рамка) */
+.tp.g{background-image:linear-gradient(90deg,rgba(100,116,139,.15) .4pt,transparent .4pt),linear-gradient(rgba(100,116,139,.15) .4pt,transparent .4pt);background-size:6mm 6mm}
+.tp.g .tm{background:#fff;border:1.2pt solid var(--ac);padding:6mm 4mm;box-shadow:2.5mm 2.5mm 0 var(--ac);margin:auto 3mm}
+.tp.g .to{background:#fff;padding:2mm;border:.6pt solid #94a3b8}
+
+/* Layout r: Ліворуч, емблеми зверху */
+.tp.r{text-align:left;padding:5mm}
+.tp.r .tlg{justify-content:flex-start;margin-top:3mm}
+.tp.r .dv{margin-left:0}
+
+/* Layout m: Мінімалістична */
+.tp.m{text-align:left;padding:6mm;border:.8pt solid #94a3b8}
+.tp.m .tmk{color:#64748b;font-weight:500}
+.tp.m .t1{font-size:20pt;font-weight:700}
+.tp.m .dv{margin-left:0;width:24mm;border-top-width:1.2pt}
+.tp.m .tlg{order:3;justify-content:flex-end;margin:3mm 0 0 0}
+.tp.m .lg{width:20mm;height:20mm}
+.tp.m .to{order:4;margin-top:3mm}
+
+/* A4 Full Page Scaling & Table Resizing */
+.pa4 .pg{font-size:10pt;line-height:1.4}
+.pa4 .st{font-size:13pt}.pa4 .sc{font-size:8.5pt}.pa4 .bar,.pa4 .section-bar{font-size:9.5pt;padding:1mm 2.5mm;margin:3mm 0 1.5mm}
+.pa4 .tt,.pa4 .tac-table{font-size:9pt}.pa4 .tt th,.pa4 .tac-table th{font-size:8.2pt;padding:1.4mm 2mm}.pa4 .tt td,.pa4 .tac-table td{padding:1.4mm 2mm}
+.pa4 .mr,.pa4 .co,.pa4 .tac-callout{font-size:8.8pt;padding:1.4mm 2.5mm}.pa4 .ft{font-size:8pt}
+.edp table{table-layout:fixed}
+.edp td,.edp th{position:relative}
+.edp td.sel-c,.edp th.sel-c{outline:2px solid #0284c7;outline-offset:-2px;background-color:rgba(2,132,199,.08)}
+.rz-col{position:absolute;top:0;right:-3px;width:6px;height:100%;cursor:col-resize;z-index:20}
+.rz-col:hover,.rz-col.act{background:#0284c7}
+.rz-row{position:absolute;left:0;bottom:-3px;width:100%;height:6px;cursor:row-resize;z-index:20}
+.rz-row:hover,.rz-row.act{background:#0284c7}
+.pr-only-title .wrap:not(.is-title-wrap){display:none!important}
+.pr-no-title .wrap.is-title-wrap{display:none!important}
+@media(max-width:800px){body{flex-direction:column;height:auto;overflow:auto}aside{width:auto;max-height:55vh}}
+@media print{body{display:block;height:auto;overflow:visible;background:#fff}main{padding:0;overflow:visible;background:none}aside,.np,#tm,dialog{display:none!important}
+#sheets{zoom:1!important}.wrap{margin:0;break-after:page}.wrap:last-child{break-after:auto}.sh{box-shadow:none}.pg.ov{outline:none}.ph{border-color:transparent;color:transparent}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style>
+<style>
+@media print{.is-cover-wrap{display:none!important}.pr-cover .wrap:not(.is-cover-wrap){display:none!important}.pr-cover .is-cover-wrap{display:block!important}}
+.cv-d{--ac:#fff;--al:transparent}.cv-d .t2,.cv-d .t3,.cv-d .t4,.cv-d .to{color:#fff!important}.cv-d .to{border-top-color:#fff}.cv-d .tp.d .tmk{background:transparent;border-bottom:1pt solid #fff}.cv-d .ph{border-color:#fff8;color:#fff8}
+</style>
+<style id="ps"></style>
+</head>
+<body>
+<aside class="np">
+<div class="app-brand">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M9 7h6"/><path d="M9 11h6"/><path d="M9 15h4"/></svg>
+<b style="font-size:15px;letter-spacing:.02em">Конструктор польового блокнота</b>
+</div>
+<h3>1. Друк і формат</h3>
+<label>Режим</label>
+<select id="mode" onchange="sync()"><option value="a5">A5 — сторінка на аркуш (тримач)</option><option value="a4full">A4 — повна сторінка на аркуш (шпаргалка)</option><option value="a4cut">A4 під розрізання на A5</option><option value="booklet">A4 зошитами (буклети) під палітурку</option></select>
+<label id="dw"><input type="checkbox" id="dup" onchange="sync()"> Двосторонній друк</label>
+<div id="sw"><label>Аркушів у зошиті (по 4 стор.)</label><select id="sig" onchange="sync()"><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option></select></div>
+<label>Поле під перфорацію / корінець, мм</label><input type="number" id="bind" min="8" max="25" oninput="syncD()">
+<label>Порожні сторінки (добивка)</label><select id="fill" onchange="sync()"><option value="wl">Лінійка</option><option value="gr">Клітинка</option><option value="dg">Крапки</option><option value="b">Чисті (повністю білий аркуш)</option></select>
+<label>Колір ліній</label><select id="theme" onchange="sync()"><option value="">Тактична олива</option><option value="g">Штабний графіт</option><option value="b">Чорно-білий</option></select>
+<label><input type="checkbox" id="auto" onchange="sync()"> Автоперенесення переповненого вмісту на нову сторінку</label>
+<label>Текст колонтитула</label><input id="foot" oninput="syncD()">
+<label>Масштаб перегляду</label>
+<div class="zoom-box">
+<input type="range" id="zoom" min=".3" max="1.2" step=".05" value=".8" oninput="zm()">
+<span id="zval" class="zoom-val">80%</span>
+</div>
+<p id="hint" style="font-size:11px;color:#9ca894"></p>
+<h3>2. Титульна сторінка</h3>
+<label><input type="checkbox" id="tOn" onchange="sync()"> Додати титульну</label>
+<label id="tSepW"><input type="checkbox" id="tSep" onchange="sync()"> Друкувати титульну окремо від блоків</label>
+<div id="tPrBtns" style="display:flex;gap:4px;margin:4px 0">
+<button id="pm-all" onclick="setPrintScope('all')" style="flex:1;font-size:11px;background:#3f4e2c;border-color:#688246">Усе</button>
+<button id="pm-only-title" onclick="setPrintScope('only-title')" style="flex:1;font-size:11px">Лише титульна</button>
+<button id="pm-no-title" onclick="setPrintScope('no-title')" style="flex:1;font-size:11px">Лише блоки</button>
+</div>
+<select id="tLay" onchange="sync()"><option value="d">Штабна папка (рапорт-стиль)</option><option value="g">Топографічна сітка (рамка)</option><option value="c">По центру (класика)</option><option value="r">Ліворуч, емблеми зверху</option><option value="m">Мінімалістична</option></select>
+<label>Назва</label><input id="t_t" oninput="syncD()"><label>Підзаголовок</label><input id="t_s" oninput="syncD()">
+<label>Підрозділ</label><input id="t_u" oninput="syncD()"><label>Період</label><input id="t_p" oninput="syncD()">
+<label>Власник / позивний</label><input id="t_o" oninput="syncD()"><label>Позначка / гриф зверху</label><input id="t_m" oninput="syncD()">
+<label>Емблеми (PNG, JPG, SVG)</label>
+<div id="lgs"></div>
+<h3>3. Блоки</h3>
+<input id="q" placeholder="Пошук блоків…" oninput="cat()" style="margin-bottom:4px">
+<label><input type="checkbox" id="grp" checked onchange="cat()"> Групи (вимкніть, щоб змінювати порядок сторінок)</label>
+<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px">
+<button onclick="setAll(1)">Усі</button>
+<button onclick="setAll(0)">Жоден</button>
+<button onclick="preset('cimic')">ЦВС</button>
+<button onclick="preset('cmd')">Командир</button>
+<button onclick="preset('cadet')">Курсант</button>
+<button onclick="preset('ppp')">ППП</button>
+<button onclick="preset('soc')">Соцсупровід</button>
+<button onclick="nw()">+ Новий блок</button>
+<button onclick="openImpCode()">+ За кодом</button>
+</div>
+<div id="cat"></div>
+<h3>4. Обкладинка зі спинкою</h3>
+<label><input type="checkbox" id="cvOn" onchange="cvSync()"> Додати розворот обкладинки (для друкарні)</label>
+<div id="cvBox" style="display:none">
+<label>Папір блока (за замовчуванням — офісний)</label><select id="cvP" onchange="cvSync()"><option value="0.09">70 г/м²</option><option value="0.10">80 г/м² — стандартний офісний</option><option value="0.11">90 г/м²</option><option value="0.14">120 г/м²</option><option value="0.17">150 г/м²</option></select>
+<label>Своя товщина аркуша, мм (необов’язково)</label><input id="cvO" placeholder="напр. 0.10" oninput="cvD()">
+<label>Палітурка</label><select id="cvB" onchange="cvSync()"><option value="soft">М’яка / клейова / скоба</option><option value="hard">Тверда (+2×2,5 мм картон)</option></select>
+<label>Спинка вручну, мм (порожньо — авто)</label><input id="cvS" placeholder="авто" oninput="cvD()">
+<label>Виліт під обрізку, мм (для твердої зазвичай 15–20)</label><input type="number" id="cvV" min="0" max="25" oninput="cvD()">
+<label><input type="checkbox" id="cvM" onchange="cvSync()"> Мітки обрізу і згину</label>
+<label>Колір обкладинки</label><select id="cvC" onchange="cvSync()"><option value="w">Біла</option><option value="o">Тактична олива</option><option value="g">Графіт</option><option value="k">Чорна</option></select>
+<p id="cvInfo" style="font-size:11px;color:#9ca894"></p>
+<button onclick="printCover()">Друк обкладинки (PDF для друкарні)</button>
+</div>
+<h3>5. Збереження</h3>
+<button id="inst" style="display:none;width:100%;margin-bottom:6px" onclick="_ip&&_ip.prompt()">⬇ Встановити як додаток</button>
+<button onclick="sv()">У браузері</button> <button onclick="rs()">Скинути</button> <button onclick="ex()">Експорт JSON</button>
+<label style="margin-top:6px">Імпорт JSON (повний конфіг або 1 шаблон)</label><input type="file" accept=".json" onchange="im(event)">
+<button class="pr" onclick="pre()">Друк / зберегти PDF</button>
+</aside>
+<main><div id="inf" class="np"></div><div id="sheets"></div></main>
+<div id="tm"></div>
+<dialog id="ed">
+<input id="en" placeholder="Назва"> <input id="ec" placeholder="Код">
+<div id="tb" style="margin:6px 0;display:flex;flex-wrap:wrap;gap:3px"></div>
+<div style="font-size:11px;color:#9ca894;margin-bottom:4px">Порада: потягніть праву або нижню межу клітинки таблиці для зміни ширини стовпця чи висоти рядка.</div>
+<div id="eb" class="pg o edp" contenteditable="true"></div>
+<div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center">
+<button onclick="shareMod(ei)">↗ Поділитися шаблоном</button>
+<div><button onclick="$('ed').close()">Скасувати</button> <button class="pr" style="width:auto;margin:0" onclick="esv()">Зберегти блок</button></div>
+</div>
+</dialog>
+<dialog id="shDlg" style="max-width:460px">
+<b style="font-size:14px">↗ Поділитися шаблоном модуля</b>
+<p id="shTitle" style="font-size:12px;color:#9ca894;margin:4px 0 8px"></p>
+<label>Компактний код для месенджера (Signal / Telegram):</label>
+<textarea id="shCode" rows="4" readonly style="width:100%;font-family:ui-monospace,Consolas,monospace;font-size:11px;margin-bottom:8px"></textarea>
+<div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end">
+<button onclick="copySh('code')">📋 Копіювати код</button>
+<button onclick="copySh('link')">🔗 Копіювати посилання</button>
+<button onclick="dlSingleMod()">💾 Файл .json</button>
+<button onclick="$('shDlg').close()">Закрити</button>
+</div>
+</dialog>
+<dialog id="impDlg" style="max-width:460px">
+<b style="font-size:14px">+ Додати шаблон за кодом або посиланням</b>
+<p style="font-size:12px;color:#9ca894;margin:4px 0 8px">Вставте код шаблону або повне посилання, отримане від колеги:</p>
+<textarea id="impCodeTxt" rows="4" placeholder="Вставте сюди код або посилання #tpl=..." style="width:100%;font-family:ui-monospace,Consolas,monospace;font-size:11px;margin-bottom:8px"></textarea>
+<div style="display:flex;gap:6px;justify-content:flex-end">
+<button onclick="$('impDlg').close()">Скасувати</button>
+<button class="pr" style="width:auto;margin:0" onclick="applyImpCode()">Додати у каталог</button>
+</div>
+</dialog>
+<script>
+const $=i=>document.getElementById(i),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const bar=t=>`<div class="bar">${t}</div>`,ln=h=>`<div class="wl" style="height:${h}mm"></div>`,gr=h=>`<div class="gr" style="height:${h}mm"></div>`,cb=t=>`<div class="ci"><span class="cb">☐</span><span>${t}</span></div>`;
+const tb=(h,r,w=[],ht=6)=>`<table class="tt"><tr>${h.map((x,i)=>`<th${w[i]?` style="width:${w[i]}%"`:''}>${x}</th>`).join('')}</tr>${(typeof r==='number'?Array.from({length:r},()=>h.map(()=>'')):r).map(a=>`<tr>${a.map(c=>`<td style="height:${ht}mm">${c}</td>`).join('')}</tr>`).join('')}</table>`;
+const rows=(a,n)=>a.map(x=>[x,...Array(n-1).fill('')]);
+const M=(id,name,code,html)=>({id,name,code,html,on:true,n:1});
+const DEF=()=>[
+M('d_daily','Щоденний план','ОПЕР / ДОБА',`<div class="mr"><span><b>Дата:</b> __.__.20__</span><span><b>День №:</b> ___</span><span><b>Позивний:</b> _______</span></div>`+bar('Пріоритети доби (топ-3)')+tb(['№','Завдання / результат','Термін','✓'],[['1','','','☐'],['2','','','☐'],['3','','','☐']],[6,66,16,12],7)+bar('Погодинний графік')+tb(['Час','Захід / нарада / виїзд'],['06–08','08–10','10–12','12–14','14–16','16–18','18–20','20–22'].map(x=>[x,'']),[22,78],7)+bar('Нотатки та ризики')+ln(36)),
+M('d_log','Журнал запитів і звернень','ЖУРНАЛ',tb(['Дата / час','Заявник / ВЦА / НГО','Суть запиту / потреба / н. п.','Вжиті заходи','Стан'],Array.from({length:12},()=>['','','','','☐']),[13,20,35,24,8],11)),
+M('d_kle','Протокол зустрічі / переговорів','KLE',`<div class="mr"><span><b>Дата / час:</b> __.__.20__ __:__</span><span><b>Місце / н. п.:</b> ____________</span></div>`+bar('Учасники (Key Leaders / Представники)')+tb(['ПІБ / позивний','Організація / посада','Вплив / контакт'],4,[34,36,30],7)+bar('Порядок денний, тези, позиції сторін')+ln(48)+bar('Домовленості та наступні кроки')+tb(['Завдання','Відповідальний','Термін','✓'],[['','','','☐'],['','','','☐'],['','','','☐']],[52,26,14,8],7)),
+M('d_risk','Матриця ризиків','РИЗИКИ',`<div class="co" style="font-size:7pt"><b>ШКАЛА:</b> L — Низький · M — Середній · H — Високий · E — Критичний</div>`+tb(['Загроза / подія','Ймов.','Насл.','Рівень','Заходи мінімізації','Відпов.'],8,[28,10,10,10,29,13],10)+bar('Залишковий ризик і рішення командира')+ln(26)),
+M('d_med','Запит евакуації (9-Line) та MIST','MEDEVAC',bar('9-Line MEDEVAC')+tb(['Рядок','Дані для передачі','Коди'],[['1. Місце підбору (MGRS)','',''],['2. Частота / позивний','',''],['3. Пацієнти за пріоритетом','A:__ B:__ C:__ D:__ E:__','A терміново · B хірургічно · C пріоритетно · D планово · E за зручності'],['4. Спецобладнання','A / B / C / D','A немає · B лебідка · C витяг · D ШВЛ'],['5. Лежачі / ходячі','L:__ A:__','L носилки · A ходячі'],['6. Безпека району','N / P / E / X','N чисто · P можливо · E ворог · X супровід'],['7. Позначення','A / B / C / D / E','A панелі · B піротехніка · C дим · D немає · E інше'],['8. Статус пацієнтів','A:__ B:__ C:__ D:__ E:__','A ЗСУ · B цивільні свої · C іноз. військ. · D іноз. цив. · E полонені'],['9. РХБ / майданчик','N / B / C','N ядерне · B біологічне · C хімічне']],[26,30,44],9)+bar('MIST')+tb(['M — механізм травми','I — поранення'],[['','']],[50,50],14)+tb(['S — ознаки (пульс, тиск, дихання, AVPU)','T — допомога (турнікет + час, ліки)'],[['','']],[50,50],16)),
+M('d_opord','Бойовий наказ (5 пунктів)','OPORD',`<div class="co">${['Отримання завдання','WARNORD','Попередній план','Рух','Рекогносцировка','План','Наказ','Контроль'].map((x,i)=>`<span class="cb">☐</span>${i+1}.${x} `).join('')}</div>`+bar('1. Обстановка (противник / свої сили / додані засоби)')+ln(26)+bar('2. Бойове завдання (Хто? Що? Коли? Де? Навіщо?)')+ln(20)+bar('3. Виконання (замисел командира / завдання підрозділам / вогонь)')+ln(40)+`<div class="g2"><div>${bar('4. Забезпечення (БК, ПММ, Мед.)')}${ln(24)}</div><div>${bar('5. Управління і зв\'язок (КСП, позивні)')}${ln(24)}</div></div>`),
+M('d_con','Контакти','КОНТАКТИ',bar('Командування, штаб та суміжні підрозділи')+tb(['Посада','Позивний / ПІБ','Телефон / частота / Сигнал'],rows(['Командир / КСП','Начальник штабу','Начальник S3 (Оперативний)','Начальник S2 (Розвідка)','Старший начальник ЦВС','Сусід ліворуч','Сусід праворуч'],3),[30,30,40],7)+bar('Цивільні органи (ВЦА/ОМС), служби (ДСНС/НПУ) та МГО')+tb(['Установа / служба','ПІБ керівника','Телефон / e-mail'],rows(['Голова ВЦА / ОМС','Черговий ДСНС','Національна поліція (НПУ)','Головний лікар ЦРЛ','Диспетчер РЕМ / Водоканал','Представник МГО (ООН / ЧХ)','Волонтерський координатор'],3),[30,30,40],7)),
+M('d_mdmp','Планування MDMP (ЦВС)','MDMP',tb(['Розрахунок часу (1/3 на 2/3)',''],[['Отримано завдання','__:__'],['Готовність штабу (1/3)','__:__'],['Час підлеглим (2/3)','__:__']],[70,30],6)+bar('Обмеження (Constraints та норми МГП)')+ln(16)+bar('7 кроків MDMP (фокус ЦВС)')+tb(['Крок','Висновки та рішення','✓'],[['1. Аналіз завдання (замисел ст. нач., WARNORD)','','☐'],['2. Оцінка обстановки (ОЦС: PMESII-PT / ASCOPE)','','☐'],['3. Розробка варіантів (маршрути евакуації, захист ЦС)','','☐'],['4. Аналіз (war game — моделювання реакції населення)','','☐'],['5. Порівняння варіантів (оцінка гуманітарних ризиків)','','☐'],['6. Замисел та рішення (Етап 6А замисел / 6Б завдання)','','☐'],['7. Розробка плану (Додаток ЦВС: текст + карта)','','☐']],[36,56,8],13)),
+M('d_pmesii','Оцінка середовища PMESII-PT','ОЦС',`<div class="mr"><span><b>Район / н. п.:</b> ____________</span><span>ASCOPE: райони, споруди, спроможності, організації, населення, події</span></div>`+tb(['Сфера PMESII-PT','Стан / фактори ASCOPE','Вплив на операцію'],rows(['P — політична (ВЦА, ОМС, лідери, лояльність)','M — військова / безпека (НПУ, ДСНС, ДПСУ)','E — економіка (ринки, банки, паливо, продовольство)','S — соціальна (населення, ВПО, релігія, настрої)','I — інформація (зв’язок, медіа, ворожі ІПСО)','I — інфраструктура (енергетика, вода, газ, мости)','P — фізичне середовище (рельєф, погода, водойми)','T — час (часові рамки, сезон, світловий день)'],3),[30,38,32],14)),
+M('d_route','Оцінка гуманітарного маршруту','МАРШРУТ',`<div class="mr"><span><b>Маршрут:</b> А ________ → Б ________</span><span><b>Дата:</b> __.__.20__</span></div>`+tb(['✓','Параметр','Результат / особливі відмітки'],[['☐','Мінна безпека (UXO / міни)','Дані інженерів:'],['☐','Узгодження з S3 / сусідами','«Вікно тиші»: __:__ – __:__'],['☐','Блокпости та переправи','Кількість БП / вантажопідйомність мостів:'],['☐','Стан дорожнього покриття','Об’їзди, уражені ділянки:'],['☐','Зв’язок на маршруті','Канал / «сліпі зони»:'],['☐','Супровід та медзабезпечення','Екіпаж НПУ / ДСНС / медевак:']],[7,33,60],9)+bar('Розрахунок евакуації / вантажу (ЗПЕ ➔ ППЕ)')+tb(['Збірний пункт (ЗПЕ)','Всього осіб','Маломобільні','Транспорт','Приймальний пункт (ППЕ)'],3,[],8)),
+M('d_nsl','Реєстр захищених об’єктів (МГП)','NO-STRIKE',tb(['№','Об’єкт і категорія','Координати (MGRS/WGS-84)','Контакт / тел.','Статус'],['Лікарня / медпункт','Водозабір / насосна ст.','Підстанція / ТП / газ','Школа / дитячий садок','Пункт незламності / ЗПЕ','Культова / історична споруда','Хімічний / техногенний об’єкт','',''].map((x,i)=>[i+1,x,'','','']),[6,28,28,24,14],10)),
+M('d_rep','Донесення та SALUTE (Наказ №36/ДСК)','ДОНЕСЕННЯ',`<div class="co" style="font-size:6.8pt"><b>Наказ ГК ЗСУ №36/ДСК:</b> <b>Форма 1.1/ЦВС</b> (Узагальнена довідка) — щоквартально до 05.04, 05.07, 05.10, 05.01.<br><b>Форма 1.2/ЦВС</b> (Зміни стану ЦС) — щочетверга до 14:00 (на 12:00), при різкій зміні — <b>НЕГАЙНО!</b> (1. Зміни PMESII · 2. Виконано · 3. План).</div>`+bar('Заготовка донесення 1.2/ЦВС')+ln(42)+bar('Розвідувальне донесення SALUTE')+tb(['S — розмір, кількість','U — підрозділ, ознаки'],[['','']],[50,50],10)+tb(['A — дії','T — час фіксації'],[['','']],[50,50],10)+tb(['L — місце (координати)','E — техніка, зброя'],[['','']],[50,50],10)),
+M('d_march','Пам’ятка MARCH PAWS, MGRS, MEDEVAC','ДОВІДНИК',bar('Тактична медицина (MARCH PAWS)')+tb(['Етап','Критичні дії на полі бою'],[['M — масивна кровотеча','Турнікет (високо і туго, записати час!), тампонада, тиснуча пов’язка'],['A — дихальні шляхи','Очистити ротоглотку, назофарингеальний повітровід, стабільне бокове положення'],['R — дихання','Огляд грудної клітки, оклюзійна наліпка на вхідний/вихідний отвір, декомпресія'],['C — кровообіг','Пульс на сонній/променевій артерії, контроль турнікетів, в/в доступ'],['H — гіпотермія / голова','Термоковдра, захист від землі, свідомість (AVPU)'],['P-A-W-S','Pain (Знеболення) · Antibiotics (Антибіотики) · Wounds (Обробка ран) · Splinting (Іммобілізація)']],[28,72],7)+`<div class="g2"><div class="co" style="font-size:6.8pt"><b>Правило орієнтування (MGRS):</b><br>1. Спочатку вправо (Схід — Easting).<br>2. Потім угору (Північ — Northing).<br>• 6 знаків = 100 м · 8 знаків = 10 м.</div><div class="co" style="font-size:6.8pt"><b>Порядок евакуації (9-Line):</b><br>1. Координати · 2. Частота/Позивний<br>3. К-сть (A-Терм., B-Пріор.) · 4. Спецобл.<br>5. Лежачі/Сидячі · 6. Безпека (N/P/E/X).</div></div>`),
+M('d_swot','SWOT-аналіз обстановки / ЦС','SWOT',`<div class="mr"><span><b>Об’єкт / напрямок:</b> _____________________</span><span><b>Дата:</b> __.__.20__</span></div><div class="g2">${['S — сильні сторони (переваги, ресурси)','W — слабкі сторони (дефіцит, вразливості)','O — можливості (допомога МГО / ВЦА)','T — загрози (противник, ІПСО, обстріли)'].map(x=>`<div>${bar(x)}${ln(38)}</div>`).join('')}</div>`+bar('Стратегічні висновки та заходи нейтралізації')+ln(34)),
+M('d_eis','Матриця Ейзенхауера та час','ПРІОРИТЕТИ',`<div class="g2">${['1. Терміново + важливо (зараз)','2. Не терміново + важливо (запланувати)','3. Терміново + не важливо (делегувати)','4. Не терміново + не важливо (відкласти)'].map((x,i)=>`<div>${bar(x)}${ln(i<2?36:30)}</div>`).join('')}</div>`+bar('Розрахунок часу (1/3 на 2/3)')+tb(['Етап','Час «Ч»','Тривалість'],[['Отримання завдання (WARNORD №1)','__:__','Всього: ____ год'],['Оцінка обстановки (1/3 штабу)','__:__','1/3: ____ год'],['Рішення і наказ (OPORD)','__:__','Доведення: __:__'],['Підготовка підлеглих (2/3)','__:__','2/3: ____ год'],['Готовність до виконання завдання','__:__','Контроль: __:__']],[46,24,30],7)),
+M('d_mett','Оцінка обстановки METT-TC / OAKOC','ТАКТИКА',tb(['Фактор','Висновки'],rows(['M — завдання (замисел ст. нач., головне завдання, обмеження)','E — противник (склад, озброєння, MLCOA / MDCOA)','T — місцевість (аналіз OAKOC нижче + погода, світловий день)','T — свої війська (укомплектованість, моральний стан, придані засоби)','T — час (підготовка позицій, висування, взаємодія)','C — цивільні (наявність місцевих, об’єкти МГП — передати в ЦВС)'],2),[32,68],12)+bar('OAKOC')+tb(['Елемент','Оцінка та вплив на бій'],rows(['O — спостереження і сектори','A — напрямки підходу','K — ключові ділянки / висоти','O — перешкоди / мінні поля','C — укриття і маскування'],2),[32,68],11)),
+M('d_fire','Картка вогню / схема опорного пункту','ОБОРОНА',`<div class="mr"><span><b>Позиція / підрозділ:</b> ____________</span><span><b>Азимут осн. напр.:</b> ___°</span><span>Пн ↑</span></div>`+gr(92)+bar('Таблиця орієнтирів та рубежів відкриття вогню')+tb(['Ор.','Назва орієнтиру / опис','Дист., м','Азимут','Засіб ураж.'],[['1','','','',''],['2','','','',''],['3','','','',''],['4','','','','']],[10,40,16,16,18],8)),
+M('d_roster','Розрахунок особового складу та БК','РОЗРАХУНОК',`<div class="mr"><span><b>Підрозділ:</b> ____________</span><span><b>За списком:</b> __ <b>В строю:</b> __ <b>300/200:</b> __</span></div>`+tb(['№','Позивний / ПІБ','Посада','Зброя / прилади (ПНБ)','Позиція','Стан'],Array.from({length:10},(_,i)=>[i+1,'','','','','']),[6,26,16,24,18,10],7)+bar('Наявність та потреба в БК / ПММ / інженерному майні')+tb(['Найменування','Норма (Б/К)','В наявності','Потреба'],rows(['Набої 5,45 / 7,62 мм','Гранати (Ф-1 / РГД / ВОГ)','ПТРК / РПГ / міни'],4),[34,22,22,22],7)),
+M('d_cff','Запит вогню та координація БПЛА','CALL FOR FIRE',tb(['Елемент','Дані спостерігача'],[['1. Ідентифікація','Позивний батареї / міномета — Це [Мій позивний], Вогонь!'],['2. Попередження','☐ пристрілка  ☐ на ураження  ☐ загороджувальний вогонь'],['3. Локація цілі','MGRS: ________________ Азимут: ___° Дист.: ___ м'],['4. Опис цілі','Піхота (укрита/відкр.) / ББМ / Міномет / СП · К-сть: ____'],['5. Спосіб ураження','Тип боєприпасу (ОФ / Дим / Освітл.) · К-сть: ____'],['6. Команди','☐ за моєю командою  ☐ по готовності  Коректура: Вліво/Вправо ___ Більше/Менше ___']],[28,72],9)+bar('Координація БПЛА / РЕБ та повітряної обстановки')+tb(['Час / сектор','Екіпаж / борт (Mavic/FPV)','Частоти / відео','Завдання / результат'],5,[22,28,22,28],8)),
+M('d_ppp_mps','Оцінка МПС та протокол iCOVER','ППП / МПС',`<div class="mr"><span><b>Підрозділ:</b> ____________</span><span><b>Дата:</b> __.__.20__</span><span><b>Рівень МПС:</b> В / С / Н / К</span></div>`+tb(['Підрозділ / позиція','О/С','Рівень МПС','Ознаки стресу / втоми','Рекомендації командиру'],5,[24,10,14,28,24],8)+bar('Перша психологічна допомога: протокол iCOVER (60 сек)')+tb(['Крок','Дія побратима / офіцера ППП'],[['I — Identify','Виявити бійця у стані гострої стресової реакції (ступор, паніка, дезорієнтація)'],['C — Connect','Встановити контакт: назвати на ім’я/позивний, взяти за плече/руку, погляд в очі'],['O — Offer commitment','Підтримати: «Я поруч, ти не один, ми впораємося разом»'],['V — Verify facts','Повернути до реальності (2–3 прості факти: де ми, хто командир, що щойно сталось)'],['E — Establish order','Відновити послідовність подій: що було до і що відбувається зараз'],['R — Request action','Дати просту чітку дію (перевірити магазин, подати воду, зайняти сектор)']],[26,74],6)),
+M('d_ppp_consult','Журнал психологічної роботи та дебрифінгу','ППП / ОБЛІК',`<div class="mr"><span><b>Період:</b> __.__ – __.__.20__</span><span><b>Підрозділ:</b> ____________</span></div>`+tb(['Дата','Позивний / підрозділ','Форма (індив. / група / ГСР)','Стан / запит','Рекомендації / контроль'],9,[13,22,22,23,20],9)+bar('Контроль ротації та відновлення особового складу')+tb(['Підрозділ / група','Діб на позиціях','Потреба у відпочинку','Запланована ротація'],3,[28,18,28,26],7)),
+M('d_soc_log','Журнал звернень та соціального супроводу','СОЦСУПРОВІД',tb(['Дата','ПІБ / позивний / підр.','Суть питання (виплати, ВЛК, УБД, сім’я)','Куди скеровано / рапорт','Термін / стан'],11,[12,24,32,20,12],9)+bar('Контрольні нагадування та подані рапорти')+ln(26)),
+M('d_soc_300','Супровід поранених (300), зниклих та родин','ОБЛІК 300 / РОДИНИ',tb(['ПІБ / позивний','Дата / обставини','Госпіталь / медзаклад','Довідка (Дод. 5) / ВЛК','Контакт родини / сповіщ.'],8,[22,18,22,18,20],10)+bar('Пам’ятка дій при пораненні / зникненні безвісти')+`<div class="co" style="font-size:6.8pt">1. Фіксація часу, місця, свідків та обставин (акт/рапорт для Довідки про обставини травми).<br>2. Уточнення етапу евакуації та госпіталю · 3. Сповіщення родини (лише через уповноважених осіб / ТЦК) · 4. Контроль виплат і ВЛК.</div>`),
+M('d_soc_contacts','Маршрутизація допомоги та кризові контакти','КРИЗОВІ СЛУЖБИ',bar('Військові та медико-психологічні служби')+tb(['Служба / установа','Контактна особа / підрозділ','Телефон / канал зв’язку'],rows(['Група контролю бойового стресу (ГКБС)','Психологічна служба бригади / батальйону','Патронатна служба / група соцсупроводу','Начальник медичної служби / евакопункт','Військова служба правопорядку (ВСП)','Гаряча лінія МОУ / ЗСУ (1512)'],3),[36,30,34],7)+bar('Цивільні, державні та реабілітаційні установи')+tb(['Установа / організація','Напрямок допомоги','Контакт / адреса'],rows(['ТЦК та СП (за місцем обліку)','Військово-лікарська комісія (ВЛК)','Регіональний центр реабілітації','Координаційний штаб (питання полонених/зниклих)','Юридична / безоплатна правова допомога','Волонтерський / ветеранський хаб'],3),[36,30,34],7)),
+M('d_cad_notes','Конспект заняття та тактична схема','КУРСАНТ / КОНСПЕКТ',`<div class="mr"><span><b>Дисципліна:</b> _________________</span><span><b>Дата:</b> __.__.20__</span></div><div class="mr"><span><b>Тема / питання:</b> _______________________________________</span></div>`+bar('Тактична схема / замальовка обстановки (сітка 5×5 мм)')+gr(66)+bar('Основні тези, визначення та висновки з заняття')+ln(78)),
+M('d_cad_norms','Облік заліків, нормативів та стрільб','ЗАЛІКИ / НОРМАТИВИ',bar('Виконання навчально-бойових нормативів')+tb(['№ / Назва нормативу','Відм. / Добре / Зад.','Мій час','Оцінка / Підпис'],8,[44,24,14,18],8)+bar('Картка вогневої підготовки та стрільб')+tb(['Дата / Вправа','Зброя / Приціл','Дальність','Результат / Влучання','Зауваження керівника'],5,[18,22,14,22,24],8)),
+M('d_cad_squad','Картка командира навчального відділення','КОМ. ВІДДІЛЕННЯ',`<div class="mr"><span><b>Навч. група / взвод:</b> _________</span><span><b>Відділення №:</b> ___</span><span><b>За списком:</b> ___</span></div>`+tb(['№','ПІБ / позивний курсанта','Посада на занятті','Зброя / прилади','Оцінка'],Array.from({length:9},(_,i)=>[i+1,'','','','']),[6,34,24,22,14],7)+bar('Контроль підготовки та заходів безпеки перед виходом')+cb('Наявність та розрядженість зброї, БК, засобів захисту (шолом, бронежилет)')+cb('Індивідуальна аптечка (турнікет у швидкому доступі), вода, засоби зв’язку')+cb('Доведено сигнали управління, порядок дій при повітряній тривозі та заходи безпеки')),
+M('d_cad_ref','Довідник курсанта: формули, ТТХ та зв’язок','ДОВІДНИК КУРСАНТА',bar('Формула тисячної та кутові величини')+`<div class="co" style="font-size:7pt"><b>D = (B × 1000) / Y</b> (D — дальність, м; B — ширина/висота цілі, м; Y — кут у тисячних).<br><b>1-00 (100 тис.) ≈ 6°</b> · Палець руки: <b>0-30</b> · Долоня: <b>1-20</b> · Сірникова коробка (довж./шир.): <b>0-85 / 0-55</b>.</div>`+bar('Базові ТТХ штатного озброєння')+tb(['Зразок','Калібр','Приц. дальн.','Вага','Боєкомплект / Примітка'],[['АК-74','5,45 мм','1000 м','3,6 кг','Магазин 30 патр. (4 маг. = 120)'],['ПКМ','7,62 мм','1500 м','7,5 кг','Стрічка 100 / 200 патр.'],['РПГ-7В','40 мм','700 м','6,3 кг','ПГ-7ВЛ / ОГ-7В (прямий постр. 330 м)'],['ГП-25','40 мм','400 м','1,5 кг','ВОГ-25 / ВОГ-25П (мін. дальн. 40 м)']],[16,14,18,14,38],6)+bar('Фонетичний алфавіт (радіообмін)')+`<div class="co" style="font-size:6.6pt;line-height:1.35"><b>A</b> Alfa · <b>B</b> Bravo · <b>C</b> Charlie · <b>D</b> Delta · <b>E</b> Echo · <b>F</b> Foxtrot · <b>G</b> Golf · <b>H</b> Hotel · <b>I</b> India · <b>J</b> Juliett · <b>K</b> Kilo · <b>L</b> Lima · <b>M</b> Mike · <b>N</b> November · <b>O</b> Oscar · <b>P</b> Papa · <b>Q</b> Quebec · <b>R</b> Romeo · <b>S</b> Sierra · <b>T</b> Tango · <b>U</b> Uniform · <b>V</b> Victor · <b>W</b> Whiskey · <b>X</b> X-ray · <b>Y</b> Yankee · <b>Z</b> Zulu</div>`),
+M('d_cad_sched','Розклад занять, самопідготовки та нарядів','РОЗПОРЯДОК / НАРЯДИ',bar('Тижневий розклад занять та самопідготовки')+tb(['День','1–2 пара (08:30–11:50)','3–4 пара (12:00–15:20)','Самопідготовка (16:00–19:00)'],rows(['Пн','Вт','Ср','Чт','Пт','Сб'],4),[8,31,31,30],8)+bar('Графік нарядів, чергувань та особистих завдань')+tb(['Дата','Вид наряду / завдання','Зміна / час','Відповідальний / відмітка'],5,[16,38,22,24],7)),
+M('d_notes','Нотатки (лінійка)','НОТАТКИ',ln(168)),
+M('d_grid','Сітка 5×5 мм','СХЕМА',`<div class="mr"><span><b>Схема / крокі місцевості:</b> ____________</span><span><b>1 клітинка =</b> ____ м</span><span>Пн ↑</span></div>`+gr(160)),
+M('d_dots','Крапкова сітка','НОТАТКИ',`<div class="dg" style="height:168mm"></div>`)];
+let S={mode:'a5',dup:false,sig:5,bind:14,fill:'wl',theme:'',foot:'ПОЛЬОВИЙ БЛОКНОТ',tOn:true,tSep:true,auto:true,title:{t:'Робочий зошит офіцера',s:'Оперативне планування та польовий облік',u:'Штаб батальйону / Група ЦВС',p:'2026 р.',o:'',m:'',lay:'d',lg:[null,null,null]},mods:DEF(),cv:{on:false,paper:'0.10',own:'',bind:'soft',bleed:3,marks:true,spine:'',color:'w'}};
+const KEY='fieldbook_v4',HINT={a5:'Друк на A5, масштаб 100%. Для двостороннього друку поле під перфорацію чергується.',a4full:'Друк на A4 книжково, масштаб 100% — зручно для настінних/настільних шпаргалок та великих таблиць.',a4cut:'Друк на A4 альбомно, далі розріжте навпіл. Двосторонній: перегортання по короткому краю. Зробіть пробний аркуш.',booklet:'Друк на A4 двосторонньо, перегортання по короткому краю. Складіть кожен аркуш навпіл, вкладіть аркуші один в один, зошити зшивайте послідовно.'};
+const STY=/^(width|height|min-height|max-height|min-width|max-width|color|background|background-color|font-size|font-weight|font-style|line-height|letter-spacing|text-align|text-decoration|text-transform|vertical-align|white-space|display|flex|flex-direction|flex-wrap|justify-content|align-items|gap|grid-template-columns|padding(-[a-z]+)?|margin(-[a-z]+)?|border(-[a-z-]+)?)$/;
+function cleanStyle(s){return s.split(';').map(x=>x.trim()).filter(x=>{const i=x.indexOf(':');if(i<1)return false;const p=x.slice(0,i).trim().toLowerCase(),v=x.slice(i+1).trim();return STY.test(p)&&!/url\(|expression|javascript|position|@|\\/i.test(v)&&(p!=='display'||/^(flex|grid|block|inline|inline-block)$/i.test(v))}).join(';')}
+function clean(h){const d=new DOMParser().parseFromString('<body>'+h,'text/html');d.querySelectorAll('script,iframe,object,embed,link,meta,style,base,form,svg,math,input,button,textarea,select').forEach(e=>e.remove());d.body.querySelectorAll('*').forEach(e=>{for(const a of [...e.attributes]){const n=a.name.toLowerCase();if(n.startsWith('on')||n==='srcdoc'||(n!=='src'&&/javascript:|expression|url\(/i.test(a.value))||(n==='href'&&!/^(#|https?:|mailto:)/i.test(a.value)))e.removeAttribute(a.name)}if(e.hasAttribute('style')){const v=cleanStyle(e.getAttribute('style'));v?e.setAttribute('style',v):e.removeAttribute('style')}if(e.tagName==='IMG'&&!/^data:image\//i.test(e.getAttribute('src')||''))e.remove()});return d.body.innerHTML}
+const msg=t=>{const e=$('tm');e.textContent=t;e.style.display='block';clearTimeout(msg.t);msg.t=setTimeout(()=>e.style.display='none',2500)};
+const unit=()=>S.mode==='booklet'?4*S.sig:S.mode==='a4cut'?(S.dup?4:2):1;
+const fillH=()=>{const k=S.mode==='a4full'?1.48:1;return{wl:ln(Math.round(172*k)),gr:gr(Math.round(172*k)),dg:`<div class="dg" style="height:${Math.round(172*k)}mm"></div>`,b:''}[S.fill]};
+function scaleA4(h){if(S.mode!=='a4full')return h;return h.replace(/height:\s*([\d.]+)px/g,(_,v)=>`height:${v/3.78}mm`).replace(/height:\s*([\d.]+)mm/g,(_,v)=>`height:${(v*1.48).toFixed(1)}mm`)}
+function titleH(){const t=S.title;return `<div class="tp ${t.lay==='c'?'':t.lay}"><div class="tmk">${esc(t.m)}</div><div class="tlg">${t.lg.map(s=>`<div class="lg ${s?'':'ph'}">${s?`<img src="${s}">`:'ЕМБЛЕМА'}</div>`).join('')}</div><div class="tm"><div class="t1">${esc(t.t)}</div><div class="t2">${esc(t.s)}</div><hr class="dv"><div class="t3">${esc(t.u)}</div><div class="t4">${esc(t.p)}</div></div><div class="to">${t.o?'Власник / позивний: '+esc(t.o):'Позивний / підрозділ: _____________________'}</div></div>`}
+const SPL=new Map();
+function split(h,t,c){const key=S.mode+'|'+h;if(SPL.has(key))return SPL.get(key);if(SPL.size>200)SPL.clear();
+const host=document.createElement('div');host.style.cssText='position:fixed;left:-9999px;top:0;visibility:hidden';host.className=S.mode==='a4full'?'pa4':S.mode==='a5'?'p1':'p2';
+host.innerHTML=`<article class="pg o"><div class="hd"><span class="st">${esc(t)}</span><span class="sc">${esc(c)}</span></div><div class="in"></div><div class="ft"><span>x</span><span>x</span></div></article>`;document.body.appendChild(host);
+const inn=host.querySelector('.in'),src=document.createElement('div'),pages=[];src.innerHTML=h;let pg=[];
+const over=()=>inn.scrollHeight>inn.clientHeight+4,flush=()=>{pages.push(pg.map(n=>n.outerHTML).join(''));pg=[];inn.innerHTML=''};
+function tbl(n){const rows=[...n.rows],head=rows[0].querySelector('th')?rows.shift():null;
+while(rows.length){const t=n.cloneNode(false);if(head)t.appendChild(head.cloneNode(true));inn.appendChild(t);let k=0;
+while(rows.length){t.appendChild(rows[0].cloneNode(true));if(over()&&(k>0||pg.length)){t.removeChild(t.lastChild);break}rows.shift();k++}
+if(!k){inn.removeChild(t);flush();continue}pg.push(t);if(rows.length)flush()}}
+function put(n){inn.appendChild(n);if(!over()){pg.push(n);return}inn.removeChild(n);
+if(n.tagName==='TABLE'&&n.rows.length>2){tbl(n);return}
+if(pg.length){flush();put(n);return}
+inn.appendChild(n);if(n.matches('.wl,.gr,.dg'))n.style.height=Math.max(20,n.offsetHeight-(inn.scrollHeight-inn.clientHeight))+'px';pg.push(n)}
+[...src.childNodes].map(n=>n.nodeType===3?(n.textContent.trim()?Object.assign(document.createElement('div'),{textContent:n.textContent}):null):n.nodeType===1?n:null).filter(Boolean).forEach(put);
+if(pg.length||!pages.length)flush();host.remove();SPL.set(key,pages);return pages}
+function bodyPages(){const p=[];S.mods.forEach(m=>{if(!m.on)return;const h=scaleA4(m.html),ch=S.auto?split(h,m.name,m.code):[h];for(let i=0;i<m.n;i++)ch.forEach((x,j)=>p.push({h:x,t:j?m.name+' (прод.)':m.name,c:m.code}))});return p}
+function layout(n){const L=[],m=S.mode;if(m==='a5'||m==='a4full')for(let i=0;i<n;i++)L.push({c:[i],l:`Стор. ${i+1}`});
+else if(m==='a4cut'){if(!S.dup)for(let i=0;i<n;i+=2)L.push({c:[i,i+1],l:`Аркуш ${i/2+1}`});else for(let k=0;k<n;k+=4){L.push({c:[k,k+2],l:`Аркуш ${k/4+1} · лицьова`});L.push({c:[k+3,k+1],l:`Аркуш ${k/4+1} · зворот`})}}
+else{const N=4*S.sig;for(let o=0;o<n;o+=N)for(let j=0;j<S.sig;j++){const b=`Зошит ${o/N+1} · аркуш ${j+1}`;L.push({c:[o+N-1-2*j,o+2*j],l:b+' · лицьова'});L.push({c:[o+2*j+1,o+N-2-2*j],l:b+' · зворот'})}}return L}
+const pg=(p,i)=>{const isBlank=p.f&&S.fill==='b';return `<article class="pg ${(S.dup||S.mode==='booklet')&&i%2?'e':'o'}${isBlank?' pg-blank':''}">${p.f||p.ti?'':`<div class="hd"><span class="st">${esc(p.t)}</span><span class="sc">${esc(p.c)}</span></div>`}<div class="in">${p.h}</div>${p.ti||isBlank?'':`<div class="ft"><span>${esc(S.foot)}</span><span>СТОР. ${String(i+1).padStart(2,'0')}</span></div>`}</article>`};
+function render(){const sep=S.tOn&&S.tSep&&S.mode!=='booklet',P=bodyPages();if(S.tOn&&!sep)P.unshift({h:titleH(),ti:1});
+const u=unit(),n=Math.max(u,Math.ceil(P.length/u)*u),L=layout(n),f=fillH();
+let out='';
+if(sep){const tCls=S.mode==='a4full'?'pa4':S.mode==='a5'?'p1':'p2 cm',half=S.mode==='a4cut'?'<article class="pg o pg-blank"></article>':'';
+out+=`<div class="wrap is-title-wrap"><div class="lab np">Титульна сторінка (окремий аркуш)</div><div class="sh ${tCls}">${pg({h:titleH(),ti:1},0)}${half}</div></div>`}
+out+=L.map(s=>`<div class="wrap"><div class="lab np">${s.l}</div><div class="sh ${S.mode==='a5'?'p1':S.mode==='a4full'?'pa4':'p2'+(S.mode==='a4cut'?' cm':'')}">${s.c.map(i=>pg(P[i]||{f:1,h:f},i)).join('')}</div></div>`).join('');
+LASTN=n;if(S.cv.on)out+=coverHtml();$('sheets').innerHTML=out;cvInfo();
+let ov=0;document.querySelectorAll('#sheets .in').forEach(e=>{if(e.scrollHeight>e.clientHeight+1){e.parentElement.classList.add('ov');ov++}});
+const pp=((S.mode==='a5'||S.mode==='a4full')?n:S.mode==='a4cut'&&!S.dup?L.length:L.length/2)+(sep?1:0);
+$('inf').innerHTML=`<b>Зібрано:</b> ${P.length+(sep?1:0)} стор. + ${n-P.length} добивки · <b>Витрата паперу:</b> ${pp} арк.${ov?` · <b style="color:#f87171">⚠ переповнено: ${ov} стор.</b>`:''}`;$('sheets').style.zoom=$('zoom').value;$('zval').textContent=Math.round($('zoom').value*100)+'%'}
+const GRP={};[['Загальне',['d_daily','d_notes','d_grid','d_dots']],['Штаб і ЦВС',['d_log','d_kle','d_risk','d_mdmp','d_pmesii','d_route','d_nsl','d_rep','d_swot']],['Командир',['d_opord','d_mett','d_fire','d_roster','d_cff','d_eis']],['Медицина і довідники',['d_med','d_march','d_con']],['ППП і соцсупровід',['d_ppp_mps','d_ppp_consult','d_soc_log','d_soc_300','d_soc_contacts']],['Курсант',['d_cad_notes','d_cad_norms','d_cad_squad','d_cad_ref','d_cad_sched']]].forEach(([g,a])=>a.forEach(id=>GRP[id]=g));
+const grp=m=>GRP[m.id]||'Власні',OPEN={},DEFIDS=new Set(DEF().map(x=>x.id));
+function card(m,i,flat){return `<div class="mc${m.on?'':' off'}"><label><input type="checkbox" ${m.on?'checked':''} onchange="S.mods[${i}].on=this.checked;go()"> ${esc(m.name)}</label><span class="ac">${flat?`<button onclick="mv(${i},-1)" title="Вгору">↑</button><button onclick="mv(${i},1)" title="Вниз">↓</button>`:''}<button onclick="shareMod(${i})" title="Поділитися шаблоном">↗</button><button onclick="edit(${i})" title="Редагувати">✎</button>${DEFIDS.has(m.id)&&!m.custom?`<button onclick="rst(${i})" title="Скинути до типового">↺</button>`:''}${m.custom?`<button onclick="del(${i})" title="Видалити">✕</button>`:''}</span>${m.on?`<div class="cp">копій: <button onclick="cp(${i},-1)">−</button> ${m.n} <button onclick="cp(${i},1)">+</button></div>`:''}</div>`}
+function cat(){const q=($('q').value||'').trim().toLowerCase(),flat=!$('grp').checked,L=[];S.mods.forEach((m,i)=>{if(!q||(m.name+' '+m.code).toLowerCase().includes(q))L.push([m,i])});
+if(!L.length){$('cat').innerHTML='<p style="font-size:11px;color:#9ca894">Нічого не знайдено</p>';return}
+if(flat){$('cat').innerHTML=L.map(([m,i])=>card(m,i,1)).join('');return}
+const G={};L.forEach(x=>(G[grp(x[0])]=G[grp(x[0])]||[]).push(x));
+$('cat').innerHTML=Object.entries(G).map(([g,a])=>`<details${q||OPEN[g]!==false?' open':''} ontoggle="OPEN['${g}']=this.open"><summary>${esc(g)} <small>(${a.filter(x=>x[0].on).length}/${a.length})</small></summary>${a.map(([m,i])=>card(m,i,0)).join('')}</details>`).join('')}
+const rst=i=>{const d=DEF().find(x=>x.id===S.mods[i].id);if(d&&confirm('Повернути «'+S.mods[i].name+'» до типового вигляду? Ваші правки цього блока буде втрачено.')){S.mods[i]={...d,on:S.mods[i].on,n:S.mods[i].n};go()}};
+function go(){cat();render()}
+const mv=(i,d)=>{const j=i+d;if(j<0||j>=S.mods.length)return;[S.mods[i],S.mods[j]]=[S.mods[j],S.mods[i]];go()},cp=(i,d)=>{S.mods[i].n=Math.max(1,Math.min(20,S.mods[i].n+d));go()},del=i=>{S.mods.splice(i,1);go()},setAll=v=>{S.mods.forEach(m=>m.on=!!v);go()};
+function preset(p){const map={cimic:['d_daily','d_log','d_kle','d_risk','d_con','d_mdmp','d_pmesii','d_route','d_nsl','d_rep','d_swot','d_grid','d_notes'],cmd:['d_daily','d_opord','d_mett','d_fire','d_roster','d_cff','d_med','d_eis','d_march','d_con','d_grid','d_notes'],cadet:['d_daily','d_cad_notes','d_cad_norms','d_cad_squad','d_cad_ref','d_cad_sched','d_mett','d_opord','d_march','d_grid','d_notes'],ppp:['d_daily','d_ppp_mps','d_ppp_consult','d_kle','d_risk','d_soc_300','d_soc_contacts','d_march','d_con','d_notes'],soc:['d_daily','d_soc_log','d_soc_300','d_soc_contacts','d_ppp_mps','d_kle','d_con','d_notes']},names={cimic:'Профіль офіцера ЦВС',cmd:'Профіль командира взводу/роти',cadet:'Робочий зошит курсанта',ppp:'Профіль офіцера ППП',soc:'Профіль фахівця із соцсупроводу'},list=map[p]||[];S.mods.forEach(m=>m.on=list.includes(m.id)||!!m.custom);if(p==='cadet'&&confirm('Підставити назву титульної та колонтитул для курсанта?')){S.title.t='Робочий зошит курсанта';S.title.s='Конспект занять, нормативи та тактична підготовка';S.title.u='Військовий інститут / Навчальний взвод';S.foot='РОБОЧИЙ ЗОШИТ КУРСАНТА';ui()}go();msg(names[p])}
+let _t;const syncD=()=>{clearTimeout(_t);_t=setTimeout(sync,250)};
+function zm(){$('sheets').style.zoom=$('zoom').value;$('zval').textContent=Math.round($('zoom').value*100)+'%'}
+function sync(){S.mode=$('mode').value;S.dup=$('dup').checked;S.sig=+$('sig').value;S.bind=+$('bind').value||14;S.fill=$('fill').value;S.theme=$('theme').value;S.foot=$('foot').value;S.tOn=$('tOn').checked;S.tSep=$('tSep').checked;S.auto=$('auto').checked;if(!S.tOn||!S.tSep||S.mode==='booklet')setPrintScope('all');const t=S.title;t.lay=$('tLay').value;['t','s','u','p','o','m'].forEach(k=>t[k]=$('t_'+k).value);look();render()}
+function look(){document.body.classList.remove('th-g','th-b');if(S.theme)document.body.classList.add('th-'+S.theme);document.documentElement.style.setProperty('--bind',S.bind+'mm');$('ps').textContent=`@page{size:${S.mode==='a5'?'148mm 210mm':S.mode==='a4full'?'210mm 297mm':'297mm 210mm'};margin:0}`;$('sw').style.display=S.mode==='booklet'?'':'none';$('dw').style.display=S.mode==='booklet'?'none':'';$('tSepW').style.display=S.tOn&&S.mode!=='booklet'?'':'none';$('tPrBtns').style.display=S.tOn?'flex':'none';$('hint').textContent=HINT[S.mode]}
+function ui(){$('mode').value=S.mode;$('dup').checked=S.dup;$('sig').value=S.sig;$('bind').value=S.bind;$('fill').value=S.fill;$('theme').value=S.theme;$('foot').value=S.foot;$('tOn').checked=S.tOn;$('tSep').checked=S.tSep;$('auto').checked=S.auto;const t=S.title;$('tLay').value=t.lay;['t','s','u','p','o','m'].forEach(k=>$('t_'+k).value=t[k]);
+$('lgs').innerHTML=[0,1,2].map(i=>`<div style="display:flex;gap:4px;margin:3px 0"><input type="file" accept="image/*" onchange="logo(${i},this.files[0])"><button onclick="S.title.lg[${i}]=null;render()">✕</button></div>`).join('');look()}
+function setPrintScope(m){if(m!=='all'){if(S.mode==='booklet'){msg('У режимі зошитів титульна входить до розкладки');m='all'}else if(!S.tSep){S.tSep=true;$('tSep').checked=true;render()}}document.body.classList.remove('pr-only-title','pr-no-title');if(m==='only-title')document.body.classList.add('pr-only-title');else if(m==='no-title')document.body.classList.add('pr-no-title');['all','only-title','no-title'].forEach(k=>{const b=$('pm-'+k);if(b){b.style.background=k===m?'#3f4e2c':'';b.style.borderColor=k===m?'#688246':''}})}
+function logo(i,f){if(!f)return;const r=new FileReader();r.onload=()=>{if(f.type==='image/svg+xml'){if(f.size>3e5)return msg('SVG завеликий');S.title.lg[i]=r.result;return render()}const im=new Image();im.onload=()=>{const k=Math.min(1,480/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);S.title.lg[i]=c.toDataURL('image/png');render()};im.src=r.result};r.readAsDataURL(f)}
+let ei=null,cur=null;const ins=h=>document.execCommand('insertHTML',false,h);
+$('tb').innerHTML=[['b','B'],['i','I'],['u','U'],['bar','Плашка'],['cb','☐ Пункт'],['wl','Лінії'],['gr','Сітка'],['tb','Таблиця'],['co','Врізка'],['ra','+Рядок'],['rd','−Рядок'],['ca','+Стовп.'],['cd','−Стовп.'],['cw-','Ш −'],['cw+','Ш +'],['rh-','В −'],['rh+','В +']].map(([a,t])=>`<button onmousedown="event.preventDefault();act('${a}')">${t}</button>`).join('');
+function prepEd(){$('eb').querySelectorAll('.rz-col,.rz-row').forEach(x=>x.remove());$('eb').querySelectorAll('td,th').forEach(c=>{const rc=document.createElement('div');rc.className='rz-col';rc.contentEditable='false';const rr=document.createElement('div');rr.className='rz-row';rr.contentEditable='false';c.append(rc,rr)})}
+function stripEd(html){const d=new DOMParser().parseFromString('<body>'+html,'text/html');d.querySelectorAll('.rz-col,.rz-row').forEach(e=>e.remove());d.querySelectorAll('.sel-c').forEach(e=>e.classList.remove('sel-c'));return d.body.innerHTML}
+function adjCol(cell,dw){const t=cell.closest('table'),idx=cell.cellIndex,tw=t.getBoundingClientRect().width;if(!tw)return;const hdrs=[...t.rows[0].cells],wds=hdrs.map(c=>c.getBoundingClientRect().width);let nw=Math.max(24,Math.min(tw-24*(hdrs.length-1),wds[idx]+dw)),diff=nw-wds[idx],nx=idx<hdrs.length-1?idx+1:idx-1;if(nx<0)return;wds[idx]=nw;wds[nx]=Math.max(24,wds[nx]-diff);const sum=wds.reduce((a,b)=>a+b,0);hdrs.forEach((c,i)=>c.style.width=((wds[i]/sum)*100).toFixed(1)+'%')}
+function adjRow(cell,dh){const r=cell.parentElement,nh=Math.max(14,r.getBoundingClientRect().height+dh);[...r.cells].forEach(c=>c.style.height=(nh/3.78).toFixed(1)+'mm')}
+function act(a){const T={b:'bold',i:'italic',u:'underline'};if(T[a])return document.execCommand(T[a]);
+if(a==='bar'){ins(bar('Розділ'));prepEd()}else if(a==='cb'){ins(cb('Пункт'));prepEd()}else if(a==='wl'){ins(ln(30));prepEd()}else if(a==='gr'){ins(gr(50));prepEd()}else if(a==='co'){ins('<div class="co"><b>Важливо:</b> текст</div>');prepEd()}
+else if(a==='tb'){const v=(prompt('Рядків, стовпців','5,3')||'').split(',').map(Number);if(v[0]>0&&v[1]>0){ins(tb(Array.from({length:v[1]},(_,i)=>'Стовп. '+(i+1)),v[0]-1));prepEd()}}
+else if(!cur)msg('Клікніть у клітинку таблиці');else{const r=cur.parentElement,t=r.closest('table'),x=cur.cellIndex;
+if(a==='ra'){const n=r.cloneNode(true);n.querySelectorAll('td,th').forEach(c=>{c.innerHTML='';c.removeAttribute('colspan')});r.after(n);prepEd()}
+else if(a==='rd'&&t.rows.length>1){r.remove();cur=null}
+else if(a==='ca'){[...t.rows].forEach(w=>{const c=w.cells[Math.min(x,w.cells.length-1)].cloneNode(false);c.innerHTML='';w.cells[Math.min(x,w.cells.length-1)].after(c)});prepEd()}
+else if(a==='cd'&&r.cells.length>1){[...t.rows].forEach(w=>w.cells[x]&&w.deleteCell(x));cur=null}
+else if(a==='cw-')adjCol(cur,-18);else if(a==='cw+')adjCol(cur,18);
+else if(a==='rh-')adjRow(cur,-6);else if(a==='rh+')adjRow(cur,6)}}
+let rz=null;
+$('eb').addEventListener('mousedown',e=>{const h=e.target.closest('.rz-col,.rz-row');if(h){e.preventDefault();rz={type:h.classList.contains('rz-col')?'col':'row',cell:h.parentElement,x:e.clientX,y:e.clientY,el:h};h.classList.add('act')}});
+document.addEventListener('mousemove',e=>{if(!rz)return;if(rz.type==='col'){adjCol(rz.cell,e.clientX-rz.x);rz.x=e.clientX}else{adjRow(rz.cell,e.clientY-rz.y);rz.y=e.clientY}});
+document.addEventListener('mouseup',()=>{if(rz){rz.el.classList.remove('act');rz=null}});
+$('eb').addEventListener('click',e=>{if(e.target.closest('.rz-col,.rz-row'))return;$('eb').querySelectorAll('.sel-c').forEach(c=>c.classList.remove('sel-c'));cur=e.target.closest('td,th');if(cur)cur.classList.add('sel-c')});
+function edit(i){ei=i;cur=null;const m=S.mods[i];$('en').value=m.name;$('ec').value=m.code;$('eb').innerHTML=m.html;prepEd();$('ed').showModal()}
+function esv(){const m=S.mods[ei];m.name=$('en').value.trim()||m.name;m.code=$('ec').value.trim();m.html=clean(stripEd($('eb').innerHTML));$('ed').close();go()}
+function nw(){const n=prompt('Назва блоку','Новий блок');if(!n)return;S.mods.push({id:'c'+Date.now(),name:n,code:'',html:bar('Розділ')+ln(100),on:true,n:1,custom:true});go();edit(S.mods.length-1)}
+// Sharing individual templates
+let shIdx=null;
+const encB64=s=>btoa(unescape(encodeURIComponent(s)));
+const decB64=s=>decodeURIComponent(escape(atob(s)));
+function shareMod(i){if(i===null||!S.mods[i])return;if($('ed').open&&ei===i)esv();shIdx=i;const m=S.mods[i],payload=JSON.stringify({tpl:1,name:m.name,code:m.code,html:m.html});$('shTitle').textContent=`Модуль: «${m.name}»`;$('shCode').value='FBTPL1:'+encB64(payload);$('shDlg').showModal()}
+function copySh(type){const code=$('shCode').value,val=type==='link'?location.href.split('#')[0]+'#tpl='+encodeURIComponent(code):code;navigator.clipboard?.writeText(val).then(()=>msg(type==='link'?'Посилання скопійовано':'Код шаблону скопійовано')).catch(()=>{$('shCode').value=val;$('shCode').select();document.execCommand('copy');msg('Скопійовано у буфер')})}
+function dlSingleMod(){const m=S.mods[shIdx],data=JSON.stringify({v:4,singleTemplate:true,modules:[{id:'c'+Date.now(),name:m.name,code:m.code,html:m.html,on:true,n:1,custom:true}]},null,2),a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download='tpl_'+(m.code||'block').replace(/[^a-zA-Z0-9а-яА-ЯіІїЇєЄ_-]/g,'_')+'.json';a.click();URL.revokeObjectURL(a.href)}
+function openImpCode(){$('impCodeTxt').value='';$('impDlg').showModal()}
+function parseAndAddTpl(raw){let s=raw.trim();if(s.includes('#tpl='))s=decodeURIComponent(s.split('#tpl=')[1]);if(s.startsWith('FBTPL1:'))s=decB64(s.slice(7));const o=JSON.parse(s);if(!o||typeof o.html!=='string')throw 0;S.mods.push({id:'c'+Date.now()+Math.floor(Math.random()*99),name:String(o.name||'Імпортований шаблон').slice(0,80),code:String(o.code||'').slice(0,60),html:clean(o.html),on:true,n:1,custom:true});go();msg(`Додано шаблон «${o.name}»`)}
+function applyImpCode(){try{parseAndAddTpl($('impCodeTxt').value);$('impDlg').close()}catch(e){msg('Невірний код або посилання шаблону')}}
+document.addEventListener('click',e=>{const c=e.target.closest('.cb,.tac-check-box');if(c)c.textContent=c.textContent.trim()==='☐'?'☑':'☐'});
+const dump=()=>JSON.stringify({v:4,mode:S.mode,dup:S.dup,sig:S.sig,bind:S.bind,fill:S.fill,theme:S.theme,foot:S.foot,tOn:S.tOn,tSep:S.tSep,auto:S.auto,title:S.title,cv:S.cv,modules:S.mods});
+let LASTN=0,_c;
+function coverCalc(){const c=S.cv,t=+c.own||+c.paper||.1,n=LASTN,layers=S.mode==='booklet'?n/2:(S.dup?n/2:n),board=c.bind==='hard'?2.5:0,auto=layers*t+2*board,spine=c.spine!==''&&+c.spine>=0?+c.spine:Math.round(auto*2)/2,[pw,ph]=S.mode==='a4full'?[210,297]:[148,210],b=+c.bleed||0,m=c.marks?6:0,o=b+m,tw=2*pw+spine;return{t,layers,board,auto,spine,pw,ph,b,m,o,tw,W:+(tw+2*o).toFixed(1),H:+(ph+2*o).toFixed(1)}}
+function cvInfo(){const k=coverCalc(),fit=(k.W<=297&&k.H<=210)||(k.W<=210&&k.H<=297);$('cvInfo').textContent=`Спинка ≈ ${k.spine} мм (${k.layers} шарів паперу × ${k.t} мм${k.board?` + картон ${2*k.board} мм`:''}). Розворот ${k.W}×${k.H} мм. `+(fit?'Влізає на A4.':'Завеликий для A4 — надішліть PDF у друкарню.')+' Значення орієнтовне: уточніть у друкарні.'}
+function coverHtml(){const c=S.cv,k=coverCalc(),{b,m,o,pw,ph,spine,W,H}=k,bg={w:'#fff',o:'#3f4e2c',g:'#2b3648',k:'#0b0b0b'}[c.color],fg=c.color==='w'?'#0f172a':'#fff',
+L=(x,y,w,h)=>`<i style="position:absolute;left:${x}mm;top:${y}mm;width:${w}mm;height:${h}mm;background:#000"></i>`,
+mk=m?[o,o+ph].map(y=>L(0,y,m-1,.25)+L(W-m+1,y,m-1,.25)).join('')+[o,o+pw,o+pw+spine,o+k.tw].map(x=>L(x,0,.25,m-1)+L(x,H-m+1,.25,m-1)).join(''):'',
+box=(x,w,st)=>`position:absolute;left:${x}mm;top:${o}mm;width:${w}mm;height:${ph}mm;box-sizing:border-box;color:${fg};${st}`;
+return `<div class="wrap is-cover-wrap"><div class="lab np">Обкладинка для друкарні · ${W}×${H} мм · спинка ${spine} мм</div><div class="sh${c.color==='w'?'':' cv-d'}" style="width:${W}mm;height:${H}mm"><div style="position:absolute;left:${m}mm;top:${m}mm;width:${k.tw+2*b}mm;height:${ph+2*b}mm;background:${bg}"></div>${mk}
+<div style="${box(o,pw,'display:flex;align-items:flex-end;justify-content:center;padding:8mm;font:7pt system-ui,Arial,sans-serif;letter-spacing:.1em')}">${esc(S.foot)}</div>
+${spine>=5?`<div style="${box(o+pw,spine,'display:flex;align-items:center;justify-content:center;overflow:hidden')}"><div style="writing-mode:vertical-rl;transform:rotate(180deg);font:700 ${Math.max(6,Math.min(14,spine*1.6)).toFixed(1)}pt system-ui,Arial,sans-serif;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap">${esc(S.title.t+(S.title.u?' — '+S.title.u:''))}</div></div>`:''}
+<div style="${box(o+pw+spine,pw,"padding:8mm;font:8pt/1.3 system-ui,'Segoe UI',Arial,sans-serif")}">${titleH()}</div></div></div>`}
+function cvSync(){const c=S.cv;c.on=$('cvOn').checked;c.paper=$('cvP').value;c.own=$('cvO').value.trim();c.bind=$('cvB').value;c.spine=$('cvS').value.trim();c.bleed=Math.min(25,Math.max(0,+$('cvV').value||0));c.marks=$('cvM').checked;c.color=$('cvC').value;$('cvBox').style.display=c.on?'':'none';render()}
+const cvD=()=>{clearTimeout(_c);_c=setTimeout(cvSync,250)};
+function cvUi(){const c=S.cv;$('cvOn').checked=c.on;$('cvP').value=c.paper;$('cvO').value=c.own;$('cvB').value=c.bind;$('cvS').value=c.spine;$('cvV').value=c.bleed;$('cvM').checked=c.marks;$('cvC').value=c.color;$('cvBox').style.display=c.on?'':'none'}
+function printCover(){if(!S.cv.on){$('cvOn').checked=true;cvSync()}const k=coverCalc();document.body.classList.add('pr-cover');$('ps').textContent=`@page{size:${k.W}mm ${k.H}mm;margin:0}`;print()}
+addEventListener('afterprint',()=>{if(document.body.classList.contains('pr-cover')){document.body.classList.remove('pr-cover');look()}});
+function pre(){const w=[],ov=document.querySelectorAll('#sheets .pg.ov').length;if(ov)w.push('Переповнено сторінок: '+ov+' (частину вмісту буде обрізано)');
+if(S.tOn){if(!S.title.t.trim())w.push('Не заповнена назва титульної');if(!S.title.lg.some(Boolean))w.push('Не додано жодної емблеми')}
+if(!S.mods.some(m=>m.on))w.push('Не обрано жодного блока');
+const n=bodyPages().length+(S.tOn&&!(S.tSep&&S.mode!=='booklet')?1:0),u=unit();if(n%u)w.push('Для кратності '+u+' додасться порожніх сторінок: '+(u-n%u));
+if(w.length&&!confirm('Перед друком:\n• '+w.join('\n• ')+'\n\nДрукувати?'))return;print()}
+function sv(){try{localStorage.setItem(KEY,dump());msg('Збережено у браузері')}catch(e){msg('Не вдалося зберегти (завеликі емблеми?)')}}
+function rs(){if(!confirm('Скинути всі зміни?'))return;localStorage.removeItem(KEY);S.mods=DEF();S.title.lg=[null,null,null];ui();go()}
+function ex(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([dump()],{type:'application/json'}));a.download='fieldbook_'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(a.href)}
+function apply(o,merge){const num=(v,a,b,d)=>Math.min(b,Math.max(a,+v||d));
+if(['a5','a4full','a4cut','booklet'].includes(o.mode))S.mode=o.mode;if(typeof o.dup==='boolean')S.dup=o.dup;S.sig=num(o.sig,3,8,S.sig);S.bind=num(o.bind,8,25,S.bind);if(['wl','gr','dg','b'].includes(o.fill))S.fill=o.fill;if(['','g','b'].includes(o.theme))S.theme=o.theme;if(typeof o.foot==='string')S.foot=o.foot.slice(0,60);if(typeof o.tOn==='boolean')S.tOn=o.tOn;if(typeof o.tSep==='boolean')S.tSep=o.tSep;if(typeof o.auto==='boolean')S.auto=o.auto;
+if(o.cv&&typeof o.cv==='object'){const c=o.cv,d=S.cv;if(typeof c.on==='boolean')d.on=c.on;if(['0.09','0.10','0.11','0.14','0.17'].includes(String(c.paper)))d.paper=String(c.paper);d.own=String(c.own??'').slice(0,6);if(['soft','hard'].includes(c.bind))d.bind=c.bind;d.bleed=Math.min(25,Math.max(0,+c.bleed||0));if(typeof c.marks==='boolean')d.marks=c.marks;d.spine=String(c.spine??'').slice(0,6);if(['w','o','g','k'].includes(c.color))d.color=c.color}
+if(o.title){const t=S.title,s=o.title;['t','s','u','p','o','m'].forEach(k=>{if(typeof s[k]==='string')t[k]=s[k].slice(0,120)});if(['c','r','m','d','g'].includes(s.lay))t.lay=s.lay;if(Array.isArray(s.lg))t.lg=[0,1,2].map(i=>/^data:image\/(png|jpeg|webp|gif|svg\+xml);base64,/.test(s.lg[i]||'')?s.lg[i]:null)}
+if(Array.isArray(o.modules)){const list=o.modules.filter(m=>m&&typeof m.html==='string').map(m=>({id:String(m.id||'x'+Math.random()).slice(0,60),name:String(m.name||'Модуль').replace(/^\d+\.\s*/,'').slice(0,80),code:String(m.code||'').slice(0,60),html:clean(m.html),on:m.on??m.enabled??true,n:num(m.n??m.copies,1,20,1),custom:merge?true:!!m.custom}));
+if(merge)list.forEach(m=>{const k=S.mods.findIndex(x=>x.id===m.id);k>=0?S.mods[k]=m:S.mods.push(m)});else{DEF().forEach(d=>{if(!list.some(m=>m.id===d.id)){d.on=false;list.push(d)}});S.mods=list}}}
+function im(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{apply(JSON.parse(r.result),true);ui();cvUi();go();msg('Імпортовано')}catch(x){msg('Помилка читання JSON')}};r.readAsText(f);e.target.value=''}
+try{const raw=localStorage.getItem(KEY);if(raw)apply(JSON.parse(raw),false)}catch(e){}
+if(location.hash.startsWith('#tpl=')){try{const o=JSON.parse(decB64(decodeURIComponent(location.hash.slice(5)).replace(/^FBTPL1:/,'')));if(confirm('Додати шаблон «'+String(o.name||'без назви').slice(0,80)+'» з посилання?\nДодавайте шаблони лише від довірених людей.'))parseAndAddTpl(location.hash)}catch(e){msg('Невірне посилання шаблону')}history.replaceState(null,'',location.pathname+location.search)}
+let _ip;addEventListener('beforeinstallprompt',e=>{e.preventDefault();_ip=e;$('inst').style.display=''});addEventListener('appinstalled',()=>$('inst').style.display='none');if('serviceWorker' in navigator&&/^https?:/.test(location.protocol))navigator.serviceWorker.register('sw.js').catch(()=>{});
+if(innerWidth<800)$('zoom').value=.45;ui();cvUi();go();
+</script>
+</body>
+</html>
